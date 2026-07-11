@@ -1,5 +1,3 @@
-# MODERNA
-
 # WISER × Moderna Quantum Challenge — RNA Folding
 
 Exploring RNA secondary structure prediction (minimum free energy folding) using
