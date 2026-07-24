@@ -211,10 +211,12 @@ Then, in order:
       (`cvar_vqe_scaling_analysis.py` + `plot_cvar_vqe_scaling.py`; energy gap and success rate are also
       measured up to `MAX_OPT_QUBITS`, beyond which only resource counts are reported -- see the script's
       docstring for why)
-- [ ] Replace placeholder "quantum energy" (`-3.0`) with actual QAOA output in
+- [x] Replace placeholder "quantum energy" (`-3.0`) with actual QAOA/CVaR-VQE output in
       `compare_to_vienna.py`, `batch_accuracy.py`, `generate_final_results.py`, `final_summary.py`
-- [ ] Replace the arbitrary noise multipliers in `noise_simulation.py` with a real
-      Qiskit Aer / PennyLane noise model
-- [ ] Replace formula-based estimates in `resource_estimator.py` / `scaling_analysis.py`
-      with numbers measured from actual circuit builds
+- [x] Replace the arbitrary noise multipliers in `noise_simulation.py` with a real
+      PennyLane depolarizing noise model (`default.mixed` device)
+- [x] Replace formula-based estimates in `resource_estimator.py` / `scaling_analysis.py`
+      with numbers measured from actual circuit builds (`scaling_analysis_real.py` /
+      `cvar_vqe_scaling_analysis.py`). The old scripts are kept for reference but now
+      print a SUPERSEDED notice on run -- don't cite their numbers in the report.
 - [ ] Write final report and presentation deck (Week 4)
