@@ -16,7 +16,12 @@ Submission deadline: **August 7, 2026**. Full execution plan:
   wobble pairs, crossing/overlap penalties, and loop-length constraints are
   **not yet implemented**.
 - ⚠️ QAOA scripts (`qaoa_demo.py`, `qaoa_optimizer.py`) are small 1–2 qubit
-  toy circuits, not yet connected to the real RNA QUBO.
+  toy circuits, not yet connected to the real RNA QUBO. The real pipeline
+  lives in `qaoa_rna_solver.py` instead.
+- ✅ Two independent quantum methods now run end-to-end on the real QUBO:
+  QAOA (`qaoa_rna_solver.py`) and CVaR-VQE (`cvar_vqe_rna_solver.py`), the
+  Week 2 Coder A/B split. Both validated against brute force on 10 nt and
+  15 nt test sequences.
 - ⚠️ `noise_simulation.py`, `resource_estimator.py`, `scaling_analysis.py`,
   `generate_final_results.py`, `final_summary.py`, `compare_to_vienna.py`,
   and `batch_accuracy.py` currently use **hardcoded/placeholder numbers**
@@ -142,6 +147,12 @@ Then, in order:
    python qaoa_optimizer.py
    ```
 
+   **Real RNA QUBO solvers (two independent methods, Week 2):**
+   ```bash
+   python qaoa_rna_solver.py
+   python cvar_vqe_rna_solver.py
+   ```
+
 5. **Analysis & plots** (run after step 2, since these read `vienna_results.csv`)
    ```bash
    python batch_accuracy.py
@@ -172,6 +183,11 @@ Then, in order:
 | `random_solver.py` | Brute-force/random search over the toy QUBO |
 | `quantum_test.py` | Minimal 1-qubit PennyLane circuit |
 | `qaoa_demo.py` / `qaoa_optimizer.py` | 2-qubit toy QAOA circuit in PennyLane |
+| `rna_to_qubo_full.py` | Full QUBO: wobble pairs, min loop size, overlap + crossing penalties, brute-force solver |
+| `qaoa_rna_solver.py` | QAOA wired to the real RNA QUBO (method 1 of 2) |
+| `cvar_vqe_rna_solver.py` | CVaR-VQE (two-local ansatz) wired to the real RNA QUBO (method 2 of 2) — decodes to dot-bracket and compares to ViennaRNA MFE |
+| `scaling_analysis_real.py` / `plot_scaling_real.py` | Measured (not estimated) QAOA resource scaling: qubits, circuit depth, gates, forward runtime |
+| `cvar_vqe_scaling_analysis.py` / `plot_cvar_vqe_scaling.py` | Measured CVaR-VQE resource scaling, plus energy gap + success rate up to `MAX_OPT_QUBITS` |
 | `noise_simulation.py` | Illustrative noise-level vs. success-probability table (placeholder math) |
 | `plot_noise.py` | Plots `results/noise_analysis.csv` → `results/noise_plot.png` |
 | `resource_estimator.py` / `scaling_analysis.py` | Estimated qubit/variable counts vs. sequence length (formula-based, not measured) |
@@ -185,11 +201,16 @@ Then, in order:
 
 ## Known issues / TODO
 
-- [ ] Add wobble (G-U) pairing and minimum hairpin loop constraint (≥3 nt) to the QUBO
-- [ ] Add crossing-pair and overlapping-pair penalty terms to the QUBO objective
-- [ ] Brute-force validate the QUBO on the 10-nt sequence against ViennaRNA MFE
-- [ ] Wire `qaoa_optimizer.py` to the real RNA QUBO instead of the 2-qubit toy problem
-- [ ] Implement a second independent method (D-Wave Ocean SDK or CVaR-VQE)
+- [x] Add wobble (G-U) pairing and minimum hairpin loop constraint (≥3 nt) to the QUBO (`rna_to_qubo_full.py`)
+- [x] Add crossing-pair and overlapping-pair penalty terms to the QUBO objective (`rna_to_qubo_full.py`)
+- [x] Brute-force validate the QUBO on sequences up to 20 candidate pairs (`brute_force_solve()`,
+      used as ground truth by both `qaoa_rna_solver.py` and `cvar_vqe_rna_solver.py`)
+- [x] Wire QAOA to the real RNA QUBO instead of the 2-qubit toy problem (`qaoa_rna_solver.py`)
+- [x] Implement a second independent method (`cvar_vqe_rna_solver.py`, CVaR-VQE with a two-local ansatz)
+- [x] Record qubit count / circuit depth / runtime for CVaR-VQE across the full sequence-length ladder
+      (`cvar_vqe_scaling_analysis.py` + `plot_cvar_vqe_scaling.py`; energy gap and success rate are also
+      measured up to `MAX_OPT_QUBITS`, beyond which only resource counts are reported -- see the script's
+      docstring for why)
 - [ ] Replace placeholder "quantum energy" (`-3.0`) with actual QAOA output in
       `compare_to_vienna.py`, `batch_accuracy.py`, `generate_final_results.py`, `final_summary.py`
 - [ ] Replace the arbitrary noise multipliers in `noise_simulation.py` with a real
