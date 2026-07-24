@@ -12,23 +12,28 @@ Submission deadline: **August 7, 2026**. Full execution plan:
 ## Project status
 
 - ✅ Classical benchmark pipeline (ViennaRNA) is real and working.
-- ⚠️ QUBO formulation currently only detects valid base pairs (Watson-Crick);
-  wobble pairs, crossing/overlap penalties, and loop-length constraints are
-  **not yet implemented**.
-- ⚠️ QAOA scripts (`qaoa_demo.py`, `qaoa_optimizer.py`) are small 1–2 qubit
-  toy circuits, not yet connected to the real RNA QUBO. The real pipeline
-  lives in `qaoa_rna_solver.py` instead.
-- ✅ Two independent quantum methods now run end-to-end on the real QUBO:
+- ✅ Full QUBO formulation (`rna_to_qubo_full.py`) implements wobble (G-U)
+  pairs, minimum hairpin loop size, and overlap/crossing penalties, and is
+  brute-force validated against ViennaRNA MFE on short sequences.
+- ⚠️ `qaoa_demo.py` / `qaoa_optimizer.py` are still small 1–2 qubit toy
+  circuits, not connected to the real RNA QUBO -- kept only as an earlier
+  step-by-step reference. The real pipeline lives in `qaoa_rna_solver.py`.
+- ✅ Two independent quantum methods run end-to-end on the real QUBO:
   QAOA (`qaoa_rna_solver.py`) and CVaR-VQE (`cvar_vqe_rna_solver.py`), the
   Week 2 Coder A/B split. Both validated against brute force on 10 nt and
   15 nt test sequences.
-- ⚠️ `noise_simulation.py`, `resource_estimator.py`, `scaling_analysis.py`,
-  `generate_final_results.py`, `final_summary.py`, `compare_to_vienna.py`,
-  and `batch_accuracy.py` currently use **hardcoded/placeholder numbers**
-  (e.g. quantum energy fixed at `-3.0`, noise levels are arbitrary
-  multipliers) rather than results computed from an actual quantum run.
-  Treat any numbers/plots from these scripts as illustrative only until
-  they're wired up to real QAOA output.
+- ✅ `compare_to_vienna.py`, `batch_accuracy.py`, `generate_final_results.py`,
+  `final_summary.py`, and `noise_simulation.py` are now wired to real
+  QAOA/CVaR-VQE output and a real PennyLane depolarizing noise model --
+  no more hardcoded placeholder numbers.
+- ⚠️ `resource_estimator.py` / `scaling_analysis.py` still contain the old
+  formula-based estimates internally. They now print a SUPERSEDED notice
+  pointing to the real measured versions (`scaling_analysis_real.py` /
+  `cvar_vqe_scaling_analysis.py`) and are kept only for reference -- don't
+  cite their numbers.
+- ✅ Resource scaling (qubits, circuit depth, gates, runtime) is measured
+  (not estimated) for both methods up to 50 nt via `scaling_analysis_real.py`
+  and `cvar_vqe_scaling_analysis.py`.
 - ❌ Final report and presentation deck (Week 4 deliverables) not started.
 
 ---
