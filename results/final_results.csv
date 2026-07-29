@@ -1,0 +1,19 @@
+Metric,Value
+Sequence,GCCGCGCGGC
+ViennaRNA MFE Structure,(((....)))
+ViennaRNA MFE Energy (kcal/mol),-2.5999999046325684
+Brute-force QUBO Optimum (internal),-6.0
+QAOA QUBO Energy (internal),-4.0
+QAOA Success Probability,0.0417
+CVaR-VQE QUBO Energy (internal),-6.0
+CVaR-VQE Success Probability,0.162
+CVaR-VQE Circuit Depth,18
+Best Quantum Method,CVaR-VQE
+Best Quantum Structure,(((....)))
+Best Quantum Real Energy (kcal/mol),-2.6
+Real Energy Gap vs. MFE (kcal/mol),0.0
+Base-Pair Precision,1.0
+Base-Pair Recall,1.0
+Base-Pair F1,1.0
+Base-Pair Distance,0
+Hamming Distance,0

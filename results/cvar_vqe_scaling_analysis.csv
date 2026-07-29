@@ -1,0 +1,14 @@
+sequence_length,n_qubits,circuit_depth,total_gates,forward_runtime_seconds,simulated,true_qubo_optimum,mean_energy_gap,success_rate,mean_opt_runtime_seconds,vienna_mfe_energy,quality_measured
+8,3,10,18,0.0,True,-2.0,0.0,1.0,0.26511581738789874,0.0,True
+10,8,15,53,0.016023874282836914,True,-4.0,0.0,1.0,2.834039290746053,0.0,True
+12,13,20,88,0.03164482116699219,True,-5.0,0.0,1.0,5.781512180964152,-0.5,True
+14,23,30,158,,False,,,,,,False
+16,33,40,228,,False,,,,,,False
+18,43,50,298,,False,,,,,,False
+20,55,62,382,,False,,,,,,False
+25,82,89,571,,False,,,,,,False
+30,116,123,809,,False,,,,,,False
+35,125,132,872,,False,,,,,,False
+40,245,252,1712,,False,,,,,,False
+45,232,239,1621,,False,,,,,,False
+50,378,385,2643,,False,,,,,,False

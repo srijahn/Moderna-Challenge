@@ -1,0 +1,5 @@
+ViennaRNA
+pennylane
+numpy
+pandas
+matplotlib

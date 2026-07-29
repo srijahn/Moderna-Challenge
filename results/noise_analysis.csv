@@ -1,0 +1,5 @@
+Noise Level,Depolarizing Probability,Cost Hamiltonian Expectation,Success Probability,Performance Loss (%)
+No Noise,0.0,-101.2091,1.0,0.0
+Low Noise,0.01,-100.0036,0.9881,1.19
+Medium Noise,0.05,-93.2157,0.921,7.9
+High Noise,0.1,-81.6413,0.8067,19.33
