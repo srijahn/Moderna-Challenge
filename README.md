@@ -278,6 +278,7 @@ Then, in order:
 
 ## Known issues / TODO
 
+- [x] Update RNA documentaion
 - [ ] Try a second QUBO encoding (e.g. one-hot per-position pairing variables instead of pair-indicator
       variables) and compare qubit count / constraint-enforcement tradeoffs against the current encoding
       (optional advanced task)
