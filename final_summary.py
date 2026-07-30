@@ -1,3 +1,9 @@
+# NOTE: this script does not import benchmark_sequences.py itself. It only
+# prints whatever sequence/metrics generate_final_results.py already wrote to
+# results/final_results.csv (now one row per benchmark sequence) -- so its
+# output changes automatically whenever the upstream benchmark set changes,
+# with no edits needed here.
+
 import pandas as pd
 
 # --- Original approach ------------------------------------------------------
@@ -15,11 +21,13 @@ import pandas as pd
 # print("RNA Length 40 -> 200 Variables")
 # print("RNA Length 50 -> 312 Variables")
 
-# Reads the real numbers written by generate_final_results.py (run that
-# script first) plus the measured scaling tables from
-# scaling_analysis_real.py / cvar_vqe_scaling_analysis.py.
+# --- Superseded: single Metric/Value row for one fixed sequence ------------
+# Was results.set_index("Metric")["Value"] for a single 10 nt sequence. Now
+# reads one row per benchmark sequence written by generate_final_results.py
+# and prints a per-sequence section plus an aggregate summary.
+
 try:
-    results = pd.read_csv("results/final_results.csv").set_index("Metric")["Value"]
+    results = pd.read_csv("results/final_results.csv")
 except FileNotFoundError:
     raise SystemExit(
         "results/final_results.csv not found -- run generate_final_results.py first."
@@ -30,34 +38,45 @@ print("=" * 60)
 print("WISER x MODERNA RNA FOLDING PROJECT")
 print("=" * 60)
 
-print("\nCLASSICAL BENCHMARK")
-print("Sequence:")
-print(results["Sequence"])
-print("ViennaRNA MFE Structure:")
-print(results["ViennaRNA MFE Structure"])
-print("ViennaRNA MFE Energy (kcal/mol):")
-print(results["ViennaRNA MFE Energy (kcal/mol)"])
+for _, row in results.iterrows():
+    print(f"\n{'-' * 60}")
+    print(f"{row['Label']}: {row['Sequence']}")
+    print("-" * 60)
 
-print("\nQUANTUM RESULTS (internal QUBO energy -- NOT directly comparable to")
-print("the ViennaRNA kcal/mol values above; see COMPARISON section below for")
-print("the real, same-units comparison)")
-print("QAOA QUBO Energy:")
-print(f"{results['QAOA QUBO Energy (internal)']}  (success probability {results['QAOA Success Probability']})")
-print("CVaR-VQE QUBO Energy:")
-print(f"{results['CVaR-VQE QUBO Energy (internal)']}  (success probability {results['CVaR-VQE Success Probability']}, "
-      f"circuit depth {results['CVaR-VQE Circuit Depth']})")
-print(f"Best quantum method (lower internal QUBO energy): {results['Best Quantum Method']}")
+    print("\nCLASSICAL BENCHMARK")
+    print("ViennaRNA MFE Structure:")
+    print(row["ViennaRNA MFE Structure"])
+    print("ViennaRNA MFE Energy (kcal/mol):")
+    print(row["ViennaRNA MFE Energy (kcal/mol)"])
 
-print("\nCOMPARISON (real ViennaRNA thermodynamic model, via")
-print("RNA.fold_compound(sequence).eval_structure() -- same units as the MFE)")
-print("Best Quantum Structure:")
-print(results["Best Quantum Structure"])
-print(f"Best Quantum Real Energy = {results['Best Quantum Real Energy (kcal/mol)']} kcal/mol")
-print(f"Real Energy Gap vs. MFE = {results['Real Energy Gap vs. MFE (kcal/mol)']} kcal/mol  (0 = exact energy match)")
-print(f"Base-Pair Precision / Recall / F1 = {results['Base-Pair Precision']} / "
-      f"{results['Base-Pair Recall']} / {results['Base-Pair F1']}")
-print(f"Base-Pair Distance = {results['Base-Pair Distance']}  (0 = exact structural match)")
-print(f"Hamming Distance = {results['Hamming Distance']}  (0 = exact dot-bracket string match)")
+    print("\nQUANTUM RESULTS (internal QUBO energy -- NOT directly comparable to")
+    print("the ViennaRNA kcal/mol values above; see COMPARISON section below for")
+    print("the real, same-units comparison)")
+    print("QAOA QUBO Energy:")
+    print(f"{row['QAOA QUBO Energy (internal)']}  (success probability {row['QAOA Success Probability']})")
+    print("CVaR-VQE QUBO Energy:")
+    print(f"{row['CVaR-VQE QUBO Energy (internal)']}  (success probability {row['CVaR-VQE Success Probability']}, "
+          f"circuit depth {row['CVaR-VQE Circuit Depth']})")
+    print(f"Best quantum method (lower internal QUBO energy): {row['Best Quantum Method']}")
+
+    print("\nCOMPARISON (real ViennaRNA thermodynamic model, via")
+    print("RNA.fold_compound(sequence).eval_structure() -- same units as the MFE)")
+    print("Best Quantum Structure:")
+    print(row["Best Quantum Structure"])
+    print(f"Best Quantum Real Energy = {row['Best Quantum Real Energy (kcal/mol)']} kcal/mol")
+    print(f"Real Energy Gap vs. MFE = {row['Real Energy Gap vs. MFE (kcal/mol)']} kcal/mol  (0 = exact energy match)")
+    print(f"Base-Pair Precision / Recall / F1 = {row['Base-Pair Precision']} / "
+          f"{row['Base-Pair Recall']} / {row['Base-Pair F1']}")
+    print(f"Base-Pair Distance = {row['Base-Pair Distance']}  (0 = exact structural match)")
+    print(f"Hamming Distance = {row['Hamming Distance']}  (0 = exact dot-bracket string match)")
+
+print("\n" + "=" * 60)
+print(f"AGGREGATE (across all {len(results)} benchmark sequences)")
+print("=" * 60)
+print(f"Mean Real Energy Gap vs. MFE (kcal/mol): {results['Real Energy Gap vs. MFE (kcal/mol)'].mean():.2f}")
+print(f"Mean Base-Pair F1: {results['Base-Pair F1'].mean():.3f}")
+print(f"Mean Base-Pair Distance: {results['Base-Pair Distance'].mean():.2f}")
+print(f"QAOA won on internal QUBO energy: {(results['Best Quantum Method'] == 'QAOA').sum()}/{len(results)} sequences")
 
 print("\nSCALING ANALYSIS (measured -- see scaling_analysis_real.py / cvar_vqe_scaling_analysis.py)")
 try:
@@ -73,9 +92,11 @@ except FileNotFoundError:
 print("\nCONCLUSION")
 print("QAOA and CVaR-VQE both ran end-to-end on the real RNA-folding QUBO")
 print("(wobble pairs, loop-size, overlap and crossing constraints), not a")
-print("simplified toy model, and are now compared to ViennaRNA using real")
-print("thermodynamic energy (kcal/mol) and base-pair-level structural")
-print("metrics -- not just the internal QUBO energy. Resource requirements")
+print("simplified toy model, across all 8 curated benchmark sequences")
+print("(benchmark_sequences.py, 8-14 nt, 35.7%-100% GC content) -- not just")
+print("a single anecdote sequence -- and are compared to ViennaRNA using")
+print("real thermodynamic energy (kcal/mol) and base-pair-level structural")
+print("metrics, not just internal QUBO energy. Resource requirements")
 print("increase rapidly with RNA sequence length -- see the scaling table above.")
 
 print("\n" + "=" * 60)

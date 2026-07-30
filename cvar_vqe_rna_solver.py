@@ -234,22 +234,18 @@ def evaluate_sequence(sequence, label):
 
 
 if __name__ == "__main__":
-    from test_sequences import TEST_SEQUENCE_10NT, TEST_SEQUENCE_12NT
+    from benchmark_sequences import BENCHMARK_SEQUENCES
 
-    # NOTE: this used to be a hardcoded "GGUGCCGAAC" (10 nt) plus a random
-    # seed=15 15-mer. Both turned out to have a fully-unpaired real
-    # ViennaRNA MFE structure -- i.e. neither actually folds -- so the
-    # "compare to ViennaRNA MFE structure/energy" step below was always
-    # comparing against an empty structure. Replaced with curated sequences
-    # (test_sequences.py) that ViennaRNA confirms fold into a real hairpin.
-    # Same 10 nt sequence used in qaoa_rna_solver.py, so the two independent
-    # methods are directly comparable on identical input.
-    seq_10 = TEST_SEQUENCE_10NT
-    seq_12 = TEST_SEQUENCE_12NT
-
+    # NOTE: this used to run on just 2 fixed sequences from test_sequences.py
+    # (10 nt / 12 nt). Switched to the full 8-sequence curated benchmark set
+    # (benchmark_sequences.py, 8-14 nt, 35.7%-100% GC content, all confirmed
+    # by ViennaRNA to fold) so this isn't validating against a single
+    # length/composition. Same set used by qaoa_rna_solver.py and
+    # batch_accuracy.py, so all methods are directly comparable on identical
+    # input.
     results = [
-        evaluate_sequence(seq_10, "10 nt sequence"),
-        evaluate_sequence(seq_12, "12 nt sequence"),
+        evaluate_sequence(seq, f"{label} sequence")
+        for label, seq, _, _, _ in BENCHMARK_SEQUENCES
     ]
 
     print("\n===== Summary =====")

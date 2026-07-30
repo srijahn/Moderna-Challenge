@@ -250,21 +250,22 @@ Then, in order:
 | `rna_to_qubo_full.py` | Full QUBO: wobble pairs, min loop size, overlap + crossing penalties, brute-force solver |
 | `select_test_sequences.py` | Reproducible search for short sequences that actually fold under ViennaRNA and fit a brute-forceable qubit budget |
 | `test_sequences.py` | Curated 10 nt / 12 nt sequences (found via the search above) used consistently across the whole pipeline as the standard validation cases |
-| `qaoa_rna_solver.py` | QAOA wired to the real RNA QUBO (method 1 of 2) |
-| `cvar_vqe_rna_solver.py` | CVaR-VQE (two-local ansatz) wired to the real RNA QUBO (method 2 of 2) — decodes to dot-bracket and compares to ViennaRNA MFE structure |
+| `qaoa_rna_solver.py` | QAOA wired to the real RNA QUBO (method 1 of 2) — loops over all 8 `benchmark_sequences.py` sequences |
+| `cvar_vqe_rna_solver.py` | CVaR-VQE (two-local ansatz) wired to the real RNA QUBO (method 2 of 2) — loops over all 8 `benchmark_sequences.py` sequences, decodes to dot-bracket and compares to ViennaRNA MFE structure |
 | `structure_metrics.py` | Real ViennaRNA energy evaluation (`eval_structure`, same units as MFE) + base-pair precision/recall/F1/distance and Hamming distance between two structures |
-| `benchmark_sequences.py` | 8 curated sequences (8–14 nt, varied GC content) confirmed to fold and sized for local quantum simulation |
+| `benchmark_sequences.py` | 8 curated sequences (8–14 nt, varied GC content) confirmed to fold and sized for local quantum simulation — the standard sequence set used across the whole pipeline (superseded `test_sequences.py`'s 10 nt / 12 nt pair, though `test_sequences.py` is still kept for `select_test_sequences.py`-style ad hoc searches) |
 | `statistical_benchmark.py` | Runs QAOA + CVaR-VQE across all 8 benchmark sequences with multiple independent trials each → `results/statistical_benchmark.csv` (every trial) and `results/statistical_benchmark_summary.csv` (mean ± std per sequence/method) |
 | `scaling_analysis_real.py` / `plot_scaling_real.py` | Measured (not estimated) QAOA resource scaling: qubits, circuit depth, gates, forward runtime |
 | `cvar_vqe_scaling_analysis.py` / `plot_cvar_vqe_scaling.py` | Measured CVaR-VQE resource scaling, plus energy gap + success rate up to `MAX_OPT_QUBITS` |
-| `noise_simulation.py` | Real PennyLane depolarizing noise model (`default.mixed`) — QAOA solution quality vs. noise level → `results/noise_analysis.csv` |
-| `plot_noise.py` | Plots `results/noise_analysis.csv` → `results/noise_plot.png` |
+| `noise_simulation.py` | Real PennyLane depolarizing noise model (`default.mixed`) — QAOA solution quality vs. noise level, looped over all 8 benchmark sequences → `results/noise_analysis.csv` |
+| `plot_noise.py` | Plots `results/noise_analysis.csv` (one line per sequence) → `results/noise_plot.png` |
 | `plot_scaling.py` | Plots the superseded formula-based scaling numbers → `results/scaling_plot.png` (removed from this repo as stale/superseded; rerun only if you specifically want to reference the old estimate) |
 | `runtime_analysis.py` | Times ViennaRNA folding for a few sequences |
-| `compare_to_vienna.py` | Runs QAOA + CVaR-VQE on one curated sequence and compares to ViennaRNA using real thermodynamic energy and base-pair metrics |
-| `batch_accuracy.py` | Same comparison as above, looped over the two curated `test_sequences.py` cases → `results/batch_accuracy.csv` |
-| `generate_final_results.py` | Runs both methods on the curated 10 nt sequence and writes a full real-metrics summary table → `results/final_results.csv` |
-| `final_summary.py` | Prints a human-readable project summary from `results/final_results.csv` and the scaling tables |
+| `compare_to_vienna.py` | Runs QAOA + CVaR-VQE on all 8 curated benchmark sequences and compares to ViennaRNA using real thermodynamic energy and base-pair metrics |
+| `batch_accuracy.py` | Same comparison as above, looped over all 8 curated `benchmark_sequences.py` cases, one row per sequence → `results/batch_accuracy.csv` |
+| `generate_final_results.py` | Runs both methods on all 8 curated benchmark sequences and writes a full real-metrics summary table, one row per sequence → `results/final_results.csv` |
+| `final_summary.py` | Prints a human-readable per-sequence + aggregate project summary from `results/final_results.csv` and the scaling tables |
+| `official_example_benchmark.py` | Classical-only ViennaRNA MFE benchmark on the 44 nt example sequence given directly in the challenge brief (Task 2) — not run through QAOA/CVaR-VQE, since it needs ~313 qubits, far past this project's measured feasibility ceiling |
 
 ---
 

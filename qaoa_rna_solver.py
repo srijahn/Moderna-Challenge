@@ -16,7 +16,7 @@ import pennylane as qml
 from pennylane import numpy as pnp
 
 from rna_to_qubo_full import get_candidate_pairs, build_qubo, energy, brute_force_solve
-from test_sequences import TEST_SEQUENCE_10NT
+from benchmark_sequences import BENCHMARK_SEQUENCES
 
 
 # ---------------------------------------------------------------------------
@@ -160,54 +160,59 @@ def run_qaoa(Q, n_layers=3, steps=150, step_size=0.03, n_restarts=2, top_k=15, s
 # 4. Run + validate against brute force
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    # Keep this short (~10 nt) so QAOA runs fast and brute force can validate it.
-    # Bump this up once you trust the pipeline -- statevector sim gets slow
-    # past ~15-18 qubits (candidate pairs).
-    #
-    # NOTE: the original hardcoded sequence here ("GGUGCCGAAC") turned out to
-    # have a fully-unpaired real ViennaRNA MFE structure -- i.e. it doesn't
-    # actually fold, so "validating" against it below was only checking QAOA
-    # against the QUBO's own brute-force optimum, never against a real MFE
-    # structure. See test_sequences.py for a sequence ViennaRNA confirms folds.
-    sequence = TEST_SEQUENCE_10NT
+    # NOTE: this used to run on a single fixed sequence (TEST_SEQUENCE_10NT).
+    # Switched to loop over the full 8-sequence curated benchmark set
+    # (benchmark_sequences.py, 8-14 nt, 35.7%-100% GC content, all confirmed
+    # by ViennaRNA to fold and sized to stay under the ~90s/11-qubit runtime
+    # observed here -- see README's QAOA scaling finding for why nothing
+    # bigger is used at full step budget). Same set cvar_vqe_rna_solver.py
+    # and batch_accuracy.py use, for direct comparability.
+    summary_rows = []
 
-    candidates = get_candidate_pairs(sequence)
-    print(f"Sequence: {sequence}")
-    print(f"Candidate pairs (qubits needed): {len(candidates)}\n")
+    for label, sequence, _, _, _ in BENCHMARK_SEQUENCES:
+        candidates = get_candidate_pairs(sequence)
+        print(f"\n===== {label}: {sequence} =====")
+        print(f"Candidate pairs (qubits needed): {len(candidates)}\n")
 
-    Q = build_qubo(candidates)
+        Q = build_qubo(candidates)
 
-    print("Running QAOA...")
-    x_bits, best_prob, offset = run_qaoa(
-        Q, n_layers=3, steps=150, n_restarts=2, top_k=15
-    )
+        print("Running QAOA...")
+        x_bits, best_prob, offset = run_qaoa(
+            Q, n_layers=3, steps=150, n_restarts=2, top_k=15
+        )
 
-    qaoa_energy = energy(x_bits, Q)
-    selected_qaoa = [candidates[k] for k, b in enumerate(x_bits) if b == 1]
+        qaoa_energy = energy(x_bits, Q)
+        selected_qaoa = [candidates[k] for k, b in enumerate(x_bits) if b == 1]
 
-    print(f"\nQAOA result (most probable bitstring, p={best_prob:.3f}):")
-    print(f"  Energy: {qaoa_energy}")
-    print("  Selected pairs:")
-    for i, j, w in selected_qaoa:
-        print(f"    ({i},{j}) {sequence[i]}-{sequence[j]}")
+        print(f"\nQAOA result (most probable bitstring, p={best_prob:.3f}):")
+        print(f"  Energy: {qaoa_energy}")
+        print("  Selected pairs:")
+        for i, j, w in selected_qaoa:
+            print(f"    ({i},{j}) {sequence[i]}-{sequence[j]}")
 
-    # Ground truth from brute force (only feasible for small n_vars)
-    best_x, best_e = brute_force_solve(Q)
-    selected_bf = [candidates[k] for k, b in enumerate(best_x) if b == 1]
+        # Ground truth from brute force (only feasible for small n_vars)
+        best_x, best_e = brute_force_solve(Q)
+        selected_bf = [candidates[k] for k, b in enumerate(best_x) if b == 1]
 
-    print(f"\nBrute-force optimum (ground truth):")
-    print(f"  Energy: {best_e}")
-    print("  Selected pairs:")
-    for i, j, w in selected_bf:
-        print(f"    ({i},{j}) {sequence[i]}-{sequence[j]}")
+        print(f"\nBrute-force optimum (ground truth):")
+        print(f"  Energy: {best_e}")
+        print("  Selected pairs:")
+        for i, j, w in selected_bf:
+            print(f"    ({i},{j}) {sequence[i]}-{sequence[j]}")
 
-    gap = abs(qaoa_energy - best_e)
-    print(f"\nEnergy gap (QAOA vs. brute force): {gap}")
-    if gap < 1e-6:
-        print("QAOA found the exact optimum.")
-    else:
-        print("QAOA landed on a near-optimal (but not exact) solution.")
-        print("This is normal for shallow QAOA circuits")
-        print("scaling analysis, report this gap honestly rather than hiding")
-        print("it. To try closing it further: increase n_layers (circuit")
-        print("depth), increase steps, or increase n_restarts/top_k above.")
+        gap = abs(qaoa_energy - best_e)
+        print(f"\nEnergy gap (QAOA vs. brute force): {gap}")
+        if gap < 1e-6:
+            print("QAOA found the exact optimum.")
+        else:
+            print("QAOA landed on a near-optimal (but not exact) solution.")
+            print("This is normal for shallow QAOA circuits -- for the final")
+            print("scaling analysis, report this gap honestly rather than hiding")
+            print("it. To try closing it further: increase n_layers (circuit")
+            print("depth), increase steps, or increase n_restarts/top_k above.")
+
+        summary_rows.append((label, sequence, len(candidates), gap))
+
+    print("\n===== Summary across all benchmark sequences =====")
+    for label, sequence, n_qubits, gap in summary_rows:
+        print(f"  {label:8} qubits={n_qubits:2d}  gap={gap:.4f}")

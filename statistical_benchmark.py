@@ -71,11 +71,11 @@ N_TRIALS_QAOA = 3    # independent QAOA trials per sequence (slower -- fewer tri
 
 QAOA_MAX_QUBITS = 11        # sequences above this qubit count are skipped for QAOA
                              # in this sweep (13 nt / 13-qubit entry) -- see docstring
-QAOA_STEPS = 150              # reduced from qaoa_rna_solver.py's default of 150,
-QAOA_RESTARTS = 12           # and 1 restart instead of 2 -- batch-sweep runtime tradeoff
+QAOA_STEPS = 100              # reduced from qaoa_rna_solver.py's default of 150,
+QAOA_RESTARTS = 2           # and 1 restart instead of 2 -- batch-sweep runtime tradeoff
 
 VQE_MAXITER = 150            # reduced from cvar_vqe_rna_solver.py's default of 200
-VQE_RESTARTS = 1             # and 1 restart instead of 2, same tradeoff as QAOA above
+VQE_RESTARTS = 2             # and 1 restart instead of 2, same tradeoff as QAOA above
 VQE_ALPHA = 0.15             # matches cvar_vqe_rna_solver.py default
 VQE_LAYERS = 3               # matches cvar_vqe_rna_solver.py default
 QAOA_LAYERS = 3               # matches qaoa_rna_solver.py default

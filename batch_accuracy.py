@@ -5,7 +5,7 @@ from rna_to_qubo_full import get_candidate_pairs, build_qubo, energy
 from qaoa_rna_solver import run_qaoa
 from cvar_vqe_rna_solver import run_cvar_vqe, pairs_to_dot_bracket
 from structure_metrics import real_energy, base_pair_metrics
-from test_sequences import TEST_SEQUENCE_10NT, TEST_SEQUENCE_12NT
+from benchmark_sequences import BENCHMARK_SEQUENCES
 
 # --- Original approach ------------------------------------------------------
 # Looped over all 50 generated 20 nt sequences in results/vienna_results.csv.
@@ -14,17 +14,18 @@ from test_sequences import TEST_SEQUENCE_10NT, TEST_SEQUENCE_12NT
 # QAOA/CVaR-VQE can handle. Left here for reference only.
 # df = pd.read_csv("results/vienna_results.csv")
 
-# --- Original 10/15 nt sequences ("GGUGCCGAAC" / seed=15 random 15-mer) ----
-# Both turned out to have a fully-unpaired real ViennaRNA MFE structure
-# (i.e. neither actually folds) -- see test_sequences.py for why these were
-# replaced with curated sequences that ViennaRNA confirms fold.
-sequences = [TEST_SEQUENCE_10NT, TEST_SEQUENCE_12NT]
+# --- Superseded: 2 fixed sequences from test_sequences.py ------------------
+# Was TEST_SEQUENCE_10NT / TEST_SEQUENCE_12NT only. Switched to the full
+# 8-sequence curated benchmark set (benchmark_sequences.py, 8-14 nt,
+# 35.7%-100% GC content, all confirmed by ViennaRNA to fold) for broader,
+# less anecdotal coverage -- same set qaoa_rna_solver.py and
+# cvar_vqe_rna_solver.py now use.
 
 print("\n========== BATCH ACCURACY ANALYSIS ==========\n")
 
 rows = []
 
-for index, sequence in enumerate(sequences):
+for index, (label, sequence, _, _, _) in enumerate(BENCHMARK_SEQUENCES):
     vienna_structure, mfe = RNA.fold(sequence)
 
     candidates = get_candidate_pairs(sequence)
@@ -53,7 +54,7 @@ for index, sequence in enumerate(sequences):
     real_energy_gap = quantum_real_energy - mfe
     metrics = base_pair_metrics(quantum_structure, vienna_structure)
 
-    print(f"Sequence {index + 1} ({sequence}, {len(sequence)} nt)")
+    print(f"Sequence {index + 1}/{len(BENCHMARK_SEQUENCES)}: {label} ({sequence}, {len(sequence)} nt)")
     print(f"ViennaRNA MFE structure: {vienna_structure}  ({mfe:.2f} kcal/mol)")
     print(f"Best quantum method: {quantum_method}")
     print(f"Quantum structure:       {quantum_structure}  ({quantum_real_energy:.2f} kcal/mol)")
@@ -65,6 +66,7 @@ for index, sequence in enumerate(sequences):
     print("--------------------------")
 
     rows.append({
+        "label": label,
         "sequence": sequence,
         "length": len(sequence),
         "vienna_mfe_structure": vienna_structure,
@@ -84,7 +86,7 @@ df = pd.DataFrame(rows)
 df.to_csv("results/batch_accuracy.csv", index=False)
 
 print("\n========== SUMMARY ==========")
-print(f"Sequences tested: {len(sequences)}")
+print(f"Sequences tested: {len(BENCHMARK_SEQUENCES)}")
 print(f"Mean real energy gap (kcal/mol): {df['real_energy_gap'].mean():.2f}")
 print(f"Mean base-pair F1: {df['f1'].mean():.3f}")
 print(f"Mean base-pair distance: {df['base_pair_distance'].mean():.2f}")
