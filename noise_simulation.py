@@ -8,6 +8,10 @@ Trains the real QAOA circuit (same formulation as qaoa_rna_solver.py)
 noiselessly, then re-evaluates the *trained, fixed* circuit under
 increasing single-qubit depolarizing noise applied after every QAOA layer.
 
+Training now uses derivative-free COBYLA (scipy.optimize.minimize), same
+change as qaoa_rna_solver.py -- see that file's docstring for why
+backprop-based gradient descent scaled badly with qubit count.
+
 Metric: instead of guessing at a "success probability", this tracks the
 expectation value of the cost Hamiltonian (the actual quantity QAOA
 optimizes) as noise increases, normalized against the maximally-mixed-state
@@ -21,7 +25,7 @@ mixed -- a physically meaningful and honestly-labeled stand-in for the
 import numpy as np
 import pandas as pd
 import pennylane as qml
-from pennylane import numpy as pnp
+from scipy.optimize import minimize
 
 from rna_to_qubo_full import get_candidate_pairs, build_qubo
 from qaoa_rna_solver import qubo_to_ising, build_hamiltonians
@@ -71,28 +75,31 @@ for label, sequence, _, _, _ in BENCHMARK_SEQUENCES:
     # --- 1. Train QAOA parameters noiselessly (ideal statevector device) ---
     dev_ideal = qml.device("default.qubit", wires=n_qubits)
 
-    @qml.qnode(dev_ideal, diff_method="backprop")
+    # No diff_method specified and plain numpy inputs below -- pure forward
+    # simulation, no autodiff/backprop graph ever gets built.
+    @qml.qnode(dev_ideal)
     def cost_function(params):
-        gammas, betas = params[0], params[1]
+        gammas, betas = params[:n_layers], params[n_layers:]
         for i in range(n_qubits):
             qml.Hadamard(wires=i)
         qml.layer(qaoa_layer, n_layers, gammas, betas)
         return qml.expval(cost_h)
 
+    def objective(flat_params):
+        return float(cost_function(flat_params))
+
     print("Training QAOA (noiseless) to get fixed circuit parameters...")
     best_final_cost, best_params = None, None
-    for seed in range(2):
-        np.random.seed(seed)
-        params = pnp.array(
-            [np.random.uniform(0, 0.3, n_layers), np.random.uniform(0, 0.3, n_layers)],
-            requires_grad=True,
+    for r in range(2):
+        rng = np.random.default_rng(r)
+        x0 = np.concatenate([rng.uniform(0, 0.3, n_layers), rng.uniform(0, 0.3, n_layers)])
+        result = minimize(
+            objective, x0, method="COBYLA",
+            options={"maxiter": 150, "rhobeg": 0.3},
         )
-        opt = qml.AdamOptimizer(stepsize=0.03)
-        for step in range(150):
-            params = opt.step(cost_function, params)
-        final_cost = float(cost_function(params))
+        final_cost = float(result.fun)
         if best_final_cost is None or final_cost < best_final_cost:
-            best_final_cost, best_params = final_cost, params
+            best_final_cost, best_params = final_cost, result.x
 
     print(f"Trained. Noiseless expectation value: {best_final_cost:.4f}\n")
 
@@ -102,7 +109,7 @@ for label, sequence, _, _, _ in BENCHMARK_SEQUENCES:
 
         @qml.qnode(dev_noisy)
         def circuit(params):
-            gammas, betas = params[0], params[1]
+            gammas, betas = params[:n_layers], params[n_layers:]
             for i in range(n_qubits):
                 qml.Hadamard(wires=i)
             for layer in range(n_layers):

@@ -60,13 +60,20 @@ Submission deadline: **August 7, 2026**. Challenge brief:
   see the script's docstring) is markedly less reliable, with success
   rates as low as 0.0–0.67 and higher variance. QAOA is also only run up
   to 11 qubits in this sweep -- see the runtime finding below.
-- ⚠️ **QAOA scaling/runtime constraint (new finding).** Full QAOA (150
-  steps × 2 restarts, PennyLane backprop differentiation of a full
-  statevector) took ~90s locally at 11 qubits but ~17 minutes at 17
-  qubits -- backprop-based gradient descent scales badly with qubit count
-  in a way CVaR-VQE (derivative-free COBYLA) doesn't. This is why the
-  curated test/benchmark sequences are capped around 11–13 qubits, and
-  it's worth a line in the final report/scaling discussion.
+- ✅ **QAOA scaling/runtime fix.** Full QAOA (150 steps × 2 restarts) used to
+  use PennyLane backprop differentiation of a full statevector for gradient
+  descent (Adam) -- this took ~90s locally at 11 qubits but ~17 minutes at
+  17 qubits, because backprop differentiates through the full statevector
+  simulation at every optimizer step, not just simulating it once.
+  `qaoa_rna_solver.py` and `noise_simulation.py` now use derivative-free
+  COBYLA (`scipy.optimize.minimize`) instead, the same optimizer
+  `cvar_vqe_rna_solver.py` already used -- only forward expectation-value
+  evaluations, no autodiff/backprop graph at all. Measured: 13 qubits now
+  finishes in ~18s. The curated test/benchmark sequences are still capped
+  around 11–13 qubits (COBYLA's local search can still land on a
+  near-optimal, not exact, solution at higher qubit counts -- see the
+  "harder problem" caveat elsewhere in this file), but the runtime
+  bottleneck itself is resolved.
 - ✅ Resource scaling (qubits, circuit depth, gates, runtime) is measured
   (not estimated) for both methods up to 50 nt via `scaling_analysis_real.py`
   and `cvar_vqe_scaling_analysis.py`. Solve-quality metrics (energy gap,

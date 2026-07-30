@@ -5,15 +5,24 @@ Replaces the toy 2-qubit circuit in qaoa_optimizer.py with a real QAOA run
 over however many qubits the candidate-pair QUBO needs (one qubit per
 candidate base pair).
 
+Optimizer: derivative-free COBYLA (scipy.optimize.minimize), same choice
+already used successfully by cvar_vqe_rna_solver.py. Previously used
+PennyLane's diff_method="backprop" + gradient descent (Adam) -- measured
+~90s at 11 qubits but ~17 min at 17 qubits, because backprop has to
+differentiate through the full 2^n-dim statevector simulation at every
+optimizer step, not just simulate it once. COBYLA only needs forward
+expectation-value evaluations (no autodiff machinery at all), which is why
+CVaR-VQE doesn't show the same blowup -- see README's scaling discussion.
+
 Pipeline:
     sequence -> candidate pairs -> QUBO (Q matrix) -> Ising (h, J, offset)
-    -> QAOA circuit -> trained parameters -> most likely bitstring
+    -> QAOA circuit -> COBYLA-optimized parameters -> most likely bitstring
     -> decode back into selected base pairs -> compare to brute force
 """
 
 import numpy as np
 import pennylane as qml
-from pennylane import numpy as pnp
+from scipy.optimize import minimize
 
 from rna_to_qubo_full import get_candidate_pairs, build_qubo, energy, brute_force_solve
 from benchmark_sequences import BENCHMARK_SEQUENCES
@@ -92,8 +101,12 @@ def int_to_bits(idx, n_qubits):
 def run_qaoa(Q, n_layers=3, steps=150, step_size=0.03, n_restarts=2, top_k=15, seed_offset=0):
     # seed_offset lets callers run independent trials (e.g. for a statistical
     # benchmark across multiple runs): without it, every call restarts from
-    # the exact same internal seeds (0, 1, ..., n_restarts-1) and would
-    # silently return identical results every time it's called.
+    # the exact same internal seeds and would silently return identical
+    # results every time it's called.
+    #
+    # step_size is unused now (kept in the signature for backward
+    # compatibility with existing callers) -- COBYLA doesn't take a learning
+    # rate. `steps` is passed through as COBYLA's maxiter.
     n_qubits = Q.shape[0]
     h, J, offset = qubo_to_ising(Q)
     cost_h, mixer_h = build_hamiltonians(h, J, n_qubits)
@@ -104,43 +117,47 @@ def run_qaoa(Q, n_layers=3, steps=150, step_size=0.03, n_restarts=2, top_k=15, s
         qml.qaoa.cost_layer(gamma, cost_h)
         qml.qaoa.mixer_layer(beta, mixer_h)
 
-    @qml.qnode(dev, diff_method="backprop")
+    # No diff_method specified and plain numpy inputs below (not
+    # pennylane.numpy with requires_grad=True) -- these run as a pure
+    # forward simulation, no autodiff/backprop graph ever gets built.
+    @qml.qnode(dev)
     def cost_function(params):
-        gammas, betas = params[0], params[1]
+        gammas, betas = params[:n_layers], params[n_layers:]
         for i in range(n_qubits):
             qml.Hadamard(wires=i)
         qml.layer(qaoa_layer, n_layers, gammas, betas)
         return qml.expval(cost_h)
 
-    @qml.qnode(dev, diff_method="backprop")
+    @qml.qnode(dev)
     def probability_circuit(params):
-        gammas, betas = params[0], params[1]
+        gammas, betas = params[:n_layers], params[n_layers:]
         for i in range(n_qubits):
             qml.Hadamard(wires=i)
         qml.layer(qaoa_layer, n_layers, gammas, betas)
         return qml.probs(wires=range(n_qubits))
 
+    def objective(flat_params):
+        return float(cost_function(flat_params))
+
     best_final_cost = None
     best_params = None
 
-    for seed in range(n_restarts):
-        np.random.seed(seed_offset + seed)
-        params = pnp.array(
-            [np.random.uniform(0, 0.3, n_layers), np.random.uniform(0, 0.3, n_layers)],
-            requires_grad=True,
-        )
-        opt = qml.AdamOptimizer(stepsize=step_size)
-        for step in range(steps):
-            params = opt.step(cost_function, params)
+    for r in range(n_restarts):
+        rng = np.random.default_rng(seed_offset + r)
+        x0 = np.concatenate([rng.uniform(0, 0.3, n_layers), rng.uniform(0, 0.3, n_layers)])
 
-        final_cost = float(cost_function(params))
-        print(f"  restart {seed + 1}/{n_restarts}: final expectation = {final_cost:.4f}")
+        result = minimize(
+            objective, x0, method="COBYLA",
+            options={"maxiter": steps, "rhobeg": 0.3},
+        )
+        final_cost = float(result.fun)
+        print(f"  restart {r + 1}/{n_restarts}: final expectation = {final_cost:.4f}")
 
         if best_final_cost is None or final_cost < best_final_cost:
             best_final_cost = final_cost
-            best_params = params
+            best_params = result.x
 
-    probs = probability_circuit(best_params)
+    probs = np.array(probability_circuit(best_params))
     top_indices = np.argsort(probs)[::-1][:top_k]
 
     # classically evaluate the true QUBO energy of each candidate and keep the best
