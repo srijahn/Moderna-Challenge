@@ -1,0 +1,11 @@
+sequence_label,sequence,length,n_candidate_pairs,pair_indicator_qubits,onehot_qubits,qubit_ratio_onehot_over_pair,pair_indicator_penalty_terms,onehot_penalty_terms,vienna_mfe_structure,vienna_mfe_kcal_mol,brute_forced,pair_indicator_structure,onehot_structure,encodings_agree,pair_indicator_matches_vienna,onehot_matches_vienna
+10nt (test_sequences),GCCGCGCGGC,10,11,11,22,2.0,45,56,(((....))),-2.5999999046325684,True,(((....))),(((....))),True,True,True
+12nt (test_sequences),GCCAAAUGGGCG,12,11,11,22,2.0,43,54,(((.....))).,-4.099999904632568,True,(((....)).).,(((....)).).,True,False,False
+8nt,GCGAUAGC,8,4,4,8,2.0,5,9,((....)),-0.10000000149011612,True,((....)),((....)),True,True,True
+9nt,GCAGGAGCA,9,3,3,6,2.0,2,5,((....)).,-1.0,True,((....)).,((....)).,True,True,True
+10nt_a,GCCGCGCGGC,10,11,11,22,2.0,45,56,(((....))),-2.5999999046325684,True,(((....))),(((....))),True,True,True
+10nt_b,CCAGAAAGGA,10,4,4,8,2.0,5,9,((.....)).,-0.20000000298023224,True,((.....)).,((.....)).,True,True,True
+11nt,CGGAAGACCGA,11,6,6,12,2.0,10,16,(((....))).,-2.299999952316284,True,(((....))).,(((....))).,True,True,True
+12nt,ACCACAGGUAAA,12,6,6,12,2.0,10,16,(((...)))...,-0.30000001192092896,True,(((...)))...,(((...)))...,True,True,True
+13nt,GCGAAAAAUUCGA,13,13,13,26,2.0,52,65,.((((...)))).,-1.100000023841858,False,,,,,
+14nt,AACCACAGGUAAAA,14,8,8,16,2.0,15,23,.(((...)))....,-0.6000000238418579,True,(.((...)))....,(.((...)))....,True,False,False

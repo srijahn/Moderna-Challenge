@@ -1,19 +1,9 @@
-Metric,Value
-Sequence,GCCGCGCGGC
-ViennaRNA MFE Structure,(((....)))
-ViennaRNA MFE Energy (kcal/mol),-2.5999999046325684
-Brute-force QUBO Optimum (internal),-6.0
-QAOA QUBO Energy (internal),-4.0
-QAOA Success Probability,0.0417
-CVaR-VQE QUBO Energy (internal),-6.0
-CVaR-VQE Success Probability,0.162
-CVaR-VQE Circuit Depth,18
-Best Quantum Method,CVaR-VQE
-Best Quantum Structure,(((....)))
-Best Quantum Real Energy (kcal/mol),-2.6
-Real Energy Gap vs. MFE (kcal/mol),0.0
-Base-Pair Precision,1.0
-Base-Pair Recall,1.0
-Base-Pair F1,1.0
-Base-Pair Distance,0
-Hamming Distance,0
+Label,Sequence,ViennaRNA MFE Structure,ViennaRNA MFE Energy (kcal/mol),Brute-force QUBO Optimum (internal),QAOA QUBO Energy (internal),QAOA Success Probability,CVaR-VQE QUBO Energy (internal),CVaR-VQE Success Probability,CVaR-VQE Circuit Depth,Best Quantum Method,Best Quantum Structure,Best Quantum Real Energy (kcal/mol),Real Energy Gap vs. MFE (kcal/mol),Base-Pair Precision,Base-Pair Recall,Base-Pair F1,Base-Pair Distance,Hamming Distance
+8nt,GCGAUAGC,((....)),-0.10000000149011612,-4.0,-4.0,0.0068,-4.0,0.1838,11,QAOA,((....)),-0.1,0.0,1.0,1.0,1.0,0,0
+9nt,GCAGGAGCA,((....)).,-1.0,-4.0,-4.0,0.1178,-4.0,0.226,10,QAOA,((....)).,-1.0,0.0,1.0,1.0,1.0,0,0
+10nt_a,GCCGCGCGGC,(((....))),-2.5999999046325684,-6.0,-4.0,0.0063,-6.0,0.162,18,CVaR-VQE,(((....))),-2.6,0.0,1.0,1.0,1.0,0,0
+10nt_b,CCAGAAAGGA,((.....)).,-0.20000000298023224,-4.0,-4.0,0.0222,-4.0,0.1838,11,QAOA,((.....)).,-0.2,0.0,1.0,1.0,1.0,0,0
+11nt,CGGAAGACCGA,(((....))).,-2.299999952316284,-6.0,-6.0,0.0653,-6.0,0.1605,13,QAOA,(((....))).,-2.3,0.0,1.0,1.0,1.0,0,0
+12nt,ACCACAGGUAAA,(((...)))...,-0.30000001192092896,-6.0,-6.0,0.0653,-6.0,0.1543,13,QAOA,(((...)))...,-0.3,0.0,1.0,1.0,1.0,0,0
+13nt,GCGAAAAAUUCGA,.((((...)))).,-1.100000023841858,-8.0,0.0,0.0036,-8.0,0.1515,20,CVaR-VQE,.((((...)))).,-1.1,0.0,1.0,1.0,1.0,0,0
+14nt,AACCACAGGUAAAA,.(((...)))....,-0.6000000238418579,-6.0,-4.0,0.0063,-6.0,0.1219,15,CVaR-VQE,(.((...)))....,3.5,4.1,0.667,0.667,0.667,2,2

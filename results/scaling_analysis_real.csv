@@ -1,7 +1,7 @@
 sequence_length,n_qubits,n_hamiltonian_terms,circuit_depth,total_gates,forward_runtime_seconds,simulated
-8,3,6,16,30,0.011083602905273438,True
-10,8,33,36,131,0.0456852912902832,True
-12,13,72,55,268,0.13646864891052246,True
+8,3,6,16,30,0.0,True
+10,8,33,36,131,0.0442962646484375,True
+12,13,72,55,268,0.1507127285003662,True
 14,23,209,94,719,,False
 16,33,413,136,1371,,False
 18,43,661,175,2155,,False

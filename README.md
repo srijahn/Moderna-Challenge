@@ -99,6 +99,33 @@ Submission deadline: **August 7, 2026**. Challenge brief:
   computational challenge (combinatorial growth of the fold space, why
   classical DP is fast but breaks down once pseudoknots are allowed), and
   the proposed quantum approach (QUBO encoding + QAOA/CVaR-VQE).
+- ✅ **Second QUBO encoding (optional advanced task).** `rna_to_qubo_onehot.py`
+  implements a one-hot-per-position encoding as an alternative to the
+  pair-indicator encoding in `rna_to_qubo_full.py`: instead of one
+  qubit per candidate base pair, every position gets two directed
+  qubits per candidate partner (`y_{i->j}` and `y_{j->i}`), with an
+  explicit "at most one partner" one-hot penalty within each position's
+  choice group and a consistency penalty tying the two directions of
+  the same physical pair together. `compare_qubo_encodings.py` measures
+  both encodings across all 10 curated test/benchmark sequences
+  (`results/qubo_encoding_comparison.csv`,
+  `results/qubo_encoding_comparison_plot.png`): the one-hot encoding
+  costs exactly **2x the qubits** of the pair-indicator encoding on
+  every sequence tested (confirmed both algebraically -- 2 directed
+  qubits per candidate pair -- and empirically), and roughly
+  **1.2-1.3x the quadratic penalty terms**. On the 9/10 sequences small
+  enough to brute-force both encodings (up to 22 qubits), the two
+  encodings' optimal solutions **agree with each other on all 9** and
+  match the real ViennaRNA MFE structure on the same 7/9 -- i.e. moving
+  to one-hot doesn't change *which* structure is optimal, it only
+  changes how the "at most one partner per position" constraint is
+  spent in qubits (explicit per-position one-hot penalty vs. pairwise
+  conflict penalties in the pair-indicator encoding). Given that, the
+  pair-indicator encoding remains the better choice for this problem at
+  this scale -- half the qubits for the same answer -- and stays the
+  encoding used everywhere else in the pipeline (QAOA, CVaR-VQE,
+  scaling analysis); the one-hot encoding is kept as a documented
+  comparison point, not swapped in as the new default.
 - ❌ Final report and presentation deck (Task 7 submission package) not
   started.
 
@@ -225,6 +252,8 @@ Then, in order:
    python cvar_vqe_scaling_analysis.py
    python plot_cvar_vqe_scaling.py
    python runtime_analysis.py
+   python compare_qubo_encodings.py       # optional: second (one-hot) QUBO encoding vs. current one
+   python plot_qubo_encoding_comparison.py
    ```
 
 4. **Broader benchmark (8 sequences, multiple trials, mean ± std)**
@@ -273,15 +302,19 @@ Then, in order:
 | `generate_final_results.py` | Runs both methods on all 8 curated benchmark sequences and writes a full real-metrics summary table, one row per sequence → `results/final_results.csv` |
 | `final_summary.py` | Prints a human-readable per-sequence + aggregate project summary from `results/final_results.csv` and the scaling tables |
 | `official_example_benchmark.py` | Classical-only ViennaRNA MFE benchmark on the 44 nt example sequence given directly in the challenge brief (Task 2) — not run through QAOA/CVaR-VQE, since it needs ~313 qubits, far past this project's measured feasibility ceiling |
+| `rna_to_qubo_onehot.py` | Second QUBO encoding (optional advanced task): one-hot-per-position pairing variables (2 directed qubits per candidate pair + one-hot/consistency penalties) instead of `rna_to_qubo_full.py`'s pair-indicator variables |
+| `compare_qubo_encodings.py` | Measures qubit count and penalty-term count for both encodings across all 10 curated test/benchmark sequences, and brute-force-validates that both encodings agree with each other and with ViennaRNA MFE wherever feasible → `results/qubo_encoding_comparison.csv` |
+| `plot_qubo_encoding_comparison.py` | Plots `results/qubo_encoding_comparison.csv` (grouped bar chart, qubits per sequence per encoding) → `results/qubo_encoding_comparison_plot.png` |
 
 ---
 
 ## Known issues / TODO
 
 - [x] Update RNA documentaion
-- [ ] Try a second QUBO encoding (e.g. one-hot per-position pairing variables instead of pair-indicator
+- [x] Try a second QUBO encoding (e.g. one-hot per-position pairing variables instead of pair-indicator
       variables) and compare qubit count / constraint-enforcement tradeoffs against the current encoding
-      (optional advanced task)
+      (optional advanced task) -- see `rna_to_qubo_onehot.py` / `compare_qubo_encodings.py` and the
+      Project status entry above
 - [ ] Explicitly document the pseudoknot-exclusion rationale (crossing-pair penalty in
       `rna_to_qubo_full.py`) as a stated modeling assumption in the final report, not just in code
 - [ ] Write final report and presentation deck
