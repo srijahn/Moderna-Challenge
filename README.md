@@ -51,7 +51,7 @@ CVaR-VQE reproduces its own QUBO's exact optimum on every sequence and trial tes
 
 - **Sri Jahnavi Chinthalapudi** — QUBO formulation and both encodings (pair-indicator and one-hot), both quantum solvers (QAOA and CVaR-VQE), the statistical, scaling, and noise-robustness analyses, structural/energy evaluation metrics, and final code clean-up across the repository.
 - **Yagna Priya Gummadi** — Classical ViennaRNA benchmark implementation, and the final report and accompanying presentation.
-- **Sree Neha** — Curated benchmark sequence selection and the background review (`Rna_basics.docx`).
+- **Sreeneha Narayanam** — Curated benchmark sequence selection and the background review (`Rna_basics.docx`).
 
 ---
 
