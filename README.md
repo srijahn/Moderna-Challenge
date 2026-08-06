@@ -4,7 +4,7 @@ Exploring RNA secondary structure prediction (minimum free energy folding) using
 classical benchmarking (ViennaRNA) and quantum/quantum-inspired methods
 (QUBO formulation + QAOA/CVaR-VQE in PennyLane).
 
-Full write-up: [`Moderna_RNA_Folding_Quantum_Report.docx`](./Moderna_RNA_Folding_Quantum_Report.docx). This README summarizes the same project for anyone browsing the repository directly.
+Full write-up: [`Moderna_RNA_Folding_Quantum_Report.pdf`](./Moderna_RNA_Folding_Quantum_Report.pdf). This README summarizes the same project for anyone browsing the repository directly.
 
 ---
 
@@ -111,8 +111,8 @@ Moderna/
 │   └── cvar_vqe_scaling_plot.png
 ├── *.py                     (all scripts)
 ├── Rna_basics.docx
-├── Moderna_RNA_Folding_Quantum_Report.docx   (Task 7 final report)
-└── Moderna - WISER Quantum Challenge [SHARED].pdf
+├── Moderna_RNA_Folding_Quantum_Report.pdf   
+└── Moderna_RNA_Folding_Presentation.pptx
 ```
 
 > **Note:** every script writes only into `results/`
