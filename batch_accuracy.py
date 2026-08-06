@@ -7,20 +7,6 @@ from cvar_vqe_rna_solver import run_cvar_vqe, pairs_to_dot_bracket
 from structure_metrics import real_energy, base_pair_metrics
 from benchmark_sequences import BENCHMARK_SEQUENCES
 
-# --- Original approach ------------------------------------------------------
-# Looped over all 50 generated 20 nt sequences in results/vienna_results.csv.
-# Each 20 nt sequence has 50+ candidate base pairs (see findings_week1.md),
-# i.e. 50+ qubits -- far past what local statevector simulation of
-# QAOA/CVaR-VQE can handle. Left here for reference only.
-# df = pd.read_csv("results/vienna_results.csv")
-
-# --- Superseded: 2 fixed sequences from test_sequences.py ------------------
-# Was TEST_SEQUENCE_10NT / TEST_SEQUENCE_12NT only. Switched to the full
-# 8-sequence curated benchmark set (benchmark_sequences.py, 8-14 nt,
-# 35.7%-100% GC content, all confirmed by ViennaRNA to fold) for broader,
-# less anecdotal coverage -- same set qaoa_rna_solver.py and
-# cvar_vqe_rna_solver.py now use.
-
 print("\n========== BATCH ACCURACY ANALYSIS ==========\n")
 
 rows = []
@@ -41,15 +27,13 @@ for index, (label, sequence, _, _, _) in enumerate(BENCHMARK_SEQUENCES):
     vqe_structure = pairs_to_dot_bracket(len(sequence), vqe_pairs)
     vqe_qubo_energy = energy(vqe_bits, Q)
 
-    # Pick whichever of the two independent quantum methods found the lower
-    # *QUBO* energy (internal solver comparison, used only to pick a winner).
+    # select the one with lower QUBO energy (internal solver comparison)
     if qaoa_qubo_energy <= vqe_qubo_energy:
         quantum_structure, quantum_method = qaoa_structure, "QAOA"
     else:
         quantum_structure, quantum_method = vqe_structure, "CVaR-VQE"
 
-    # Real ViennaRNA-based comparison (Task 3): same units, same
-    # thermodynamic model as the MFE, unlike the QUBO energy above.
+    # Real ViennaRNA-based comparison: same units, same thermodynamic model as the MFE, unlike the QUBO energy above.
     quantum_real_energy = real_energy(sequence, quantum_structure)
     real_energy_gap = quantum_real_energy - mfe
     metrics = base_pair_metrics(quantum_structure, vienna_structure)
