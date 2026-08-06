@@ -1,9 +1,7 @@
 """
 CVaR-VQE solver for the RNA folding QUBO (rna_to_qubo_full.py).
 
-This is the SECOND independent quantum method required by the Week 2 plan
-(Coder A track) alongside qaoa_rna_solver.py (Coder B track / QAOA), so two
-independent quantum results exist for every test sequence.
+This is the SECOND independent quantum method for solving the RNA folding QUBO, after qaoa_rna_solver.py. 
 
 Method: Conditional Value-at-Risk VQE (Barkoutsos et al., 2020). Instead of
 optimizing the full expectation value of the cost Hamiltonian (which is
@@ -71,8 +69,7 @@ def make_probability_circuit(n_qubits, n_layers):
 # ---------------------------------------------------------------------------
 # 2. Precompute the QUBO energy of every basis state (static -- depends only
 #    on Q, not on the variational parameters). Feasible for the qubit counts
-#    used here (<=~18), same limit already documented in qaoa_rna_solver.py /
-#    scaling_analysis_real.py.
+#    used here (<=~18).
 # ---------------------------------------------------------------------------
 def all_bitstring_energies(Q):
     n = Q.shape[0]
@@ -175,7 +172,7 @@ def pairs_to_dot_bracket(length, selected_pairs):
 
 
 # ---------------------------------------------------------------------------
-# 6. Run on the Week 2 test sequences (10 nt and 15 nt), validate against
+# 6. Run on test sequences, validate against
 #    brute force, and compare to the ViennaRNA MFE structure/energy.
 # ---------------------------------------------------------------------------
 def evaluate_sequence(sequence, label):
@@ -236,13 +233,10 @@ def evaluate_sequence(sequence, label):
 if __name__ == "__main__":
     from benchmark_sequences import BENCHMARK_SEQUENCES
 
-    # NOTE: this used to run on just 2 fixed sequences from test_sequences.py
-    # (10 nt / 12 nt). Switched to the full 8-sequence curated benchmark set
-    # (benchmark_sequences.py, 8-14 nt, 35.7%-100% GC content, all confirmed
+    # Run on full sequence curated benchmark set
+    # 8-14 nt, 35.7%-100% GC content, all confirmed
     # by ViennaRNA to fold) so this isn't validating against a single
-    # length/composition. Same set used by qaoa_rna_solver.py and
-    # batch_accuracy.py, so all methods are directly comparable on identical
-    # input.
+    # length/composition.
     results = [
         evaluate_sequence(seq, f"{label} sequence")
         for label, seq, _, _, _ in BENCHMARK_SEQUENCES

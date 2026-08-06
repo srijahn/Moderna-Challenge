@@ -1,10 +1,7 @@
 """
 Real scaling analysis for the RNA-folding QAOA pipeline.
 
-Replaces resource_estimator.py / scaling_analysis.py, which used a made-up
-formula (variables = length^2 / 8) with no connection to the actual problem.
 
-This script instead:
   1. Generates a reproducible test sequence for each length
   2. Runs it through the REAL pipeline: candidate pairs -> QUBO -> Ising
   3. Builds the REAL QAOA circuit and asks PennyLane for its actual
@@ -13,9 +10,7 @@ This script instead:
      simulation, so it stays fast even at large qubit counts.
   4. For qubit counts small enough to actually simulate (<= MAX_SIM_QUBITS),
      also times a real forward-pass circuit execution on default.qubit, so
-     you get genuine runtime numbers, not estimates. Beyond that cutoff,
-     simulation is skipped and marked as such -- report this limit honestly
-     rather than extrapolating fake runtime numbers past it.
+     we get genuine runtime numbers, not estimates.
 """
 
 import random

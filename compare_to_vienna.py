@@ -6,18 +6,6 @@ from cvar_vqe_rna_solver import run_cvar_vqe, pairs_to_dot_bracket
 from structure_metrics import real_energy, base_pair_metrics
 from benchmark_sequences import BENCHMARK_SEQUENCES
 
-# --- Original placeholder sequence -----------------------------------------
-# This 20 nt sequence produces 50+ candidate base pairs (see
-# findings_week1.md), i.e. 50+ qubits -- far past what local statevector
-# simulation of QAOA/CVaR-VQE can handle. Left here for reference only.
-# sequence = "GGUGCCGAACAGUAGCACUC"
-
-# --- Superseded: single fixed 10 nt sequence --------------------------------
-# Was TEST_SEQUENCE_10NT only. Switched to loop over the full 8-sequence
-# curated benchmark set (benchmark_sequences.py, 8-14 nt, 35.7%-100% GC
-# content, all confirmed by ViennaRNA to fold) -- same set used across
-# qaoa_rna_solver.py / cvar_vqe_rna_solver.py / batch_accuracy.py.
-
 for label, sequence, _, _, _ in BENCHMARK_SEQUENCES:
     # ViennaRNA reference
     structure, mfe = RNA.fold(sequence)
@@ -47,10 +35,7 @@ for label, sequence, _, _, _ in BENCHMARK_SEQUENCES:
         quantum_energy, quantum_structure, quantum_method = vqe_energy, vqe_structure, "CVaR-VQE"
 
     # ---------------------------------------------------------------------------
-    # Real ViennaRNA-based comparison (Task 3 of the challenge PDF): evaluate
-    # each candidate structure's actual thermodynamic free energy with
-    # RNA.fold_compound(sequence).eval_structure(), so it's directly comparable
-    # (same units, same model) to the MFE -- unlike the internal QUBO energy
+    # Real ViennaRNA-based comparison: unlike the internal QUBO energy
     # above, which is an arbitrary reward/penalty scheme used only to steer the
     # quantum optimizers and is not on the same scale as kcal/mol.
     # ---------------------------------------------------------------------------

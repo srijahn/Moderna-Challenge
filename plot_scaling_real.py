@@ -1,6 +1,6 @@
 """
 Plots the REAL scaling data from scaling_analysis_real.py.
-Replaces plot_scaling.py, which plotted a hardcoded list of numbers.
+plot_scaling.py is plotted a hardcoded list of numbers.
 """
 
 import pandas as pd

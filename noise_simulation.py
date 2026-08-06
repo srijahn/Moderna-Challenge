@@ -1,16 +1,13 @@
 """
 QAOA noise analysis for the real RNA folding QUBO, using PennyLane's
 built-in depolarizing noise channel (mixed-state simulation via the
-`default.mixed` device) -- no Qiskit dependency needed since the rest of
-this project already runs on PennyLane.
+`default.mixed` device).
 
 Trains the real QAOA circuit (same formulation as qaoa_rna_solver.py)
 noiselessly, then re-evaluates the *trained, fixed* circuit under
 increasing single-qubit depolarizing noise applied after every QAOA layer.
 
-Training now uses derivative-free COBYLA (scipy.optimize.minimize), same
-change as qaoa_rna_solver.py -- see that file's docstring for why
-backprop-based gradient descent scaled badly with qubit count.
+Training uses derivative-free COBYLA (scipy.optimize.minimize).
 
 Metric: instead of guessing at a "success probability", this tracks the
 expectation value of the cost Hamiltonian (the actual quantity QAOA
@@ -31,22 +28,9 @@ from rna_to_qubo_full import get_candidate_pairs, build_qubo
 from qaoa_rna_solver import qubo_to_ising, build_hamiltonians
 from benchmark_sequences import BENCHMARK_SEQUENCES
 
-# --- Original approach ------------------------------------------------------
-# Arbitrary multipliers on an assumed ideal probability, no noisy circuit
-# was ever actually simulated. Left here for reference only.
-# ideal_probability = 0.4796
-# noise_levels = {
-#     "No Noise": ideal_probability,
-#     "Low Noise": ideal_probability * 0.90,
-#     "Medium Noise": ideal_probability * 0.75,
-#     "High Noise": ideal_probability * 0.50,
-# }
+# loops over the full 14-sequence curated benchmark set (benchmark_sequences.py,
+# 8-14 nt, 35.7%-100% GC content, all confirmed by ViennaRNA to fold).
 
-# --- Superseded: single fixed 10 nt sequence --------------------------------
-# Was TEST_SEQUENCE_10NT only. Switched to loop over the full 8-sequence
-# curated benchmark set (benchmark_sequences.py, 8-14 nt, 35.7%-100% GC
-# content, all confirmed by ViennaRNA to fold), so the noise study isn't
-# reporting a single sequence's sensitivity as if it generalized.
 n_layers = 3
 
 noise_levels = {
@@ -77,6 +61,7 @@ for label, sequence, _, _, _ in BENCHMARK_SEQUENCES:
 
     # No diff_method specified and plain numpy inputs below -- pure forward
     # simulation, no autodiff/backprop graph ever gets built.
+
     @qml.qnode(dev_ideal)
     def cost_function(params):
         gammas, betas = params[:n_layers], params[n_layers:]
@@ -133,6 +118,7 @@ for label, sequence, _, _, _ in BENCHMARK_SEQUENCES:
         # Maximally-mixed-state expectation of a traceless Ising Hamiltonian
         # is 0, so quality = exp_val / ideal_expectation is ~1.0 at p=0 and
         # decays toward 0.0 as noise dominates.
+
         quality = exp_val / ideal_expectation if ideal_expectation else 1.0
         loss = (1 - quality) * 100
 
@@ -144,11 +130,10 @@ for label, sequence, _, _, _ in BENCHMARK_SEQUENCES:
         print(f"Performance Loss: {loss:.2f}%")
         print("-" * 40)
 
-# Column kept as "Success Probability" (rather than renamed to e.g.
-# "Solution Quality") so plot_noise.py -- which reads that exact column
-# name -- keeps working unmodified. It's still a 0-1 "higher is better"
-# score, just now grounded in a real noisy-circuit simulation instead of
-# an assumed probability.
+# Column kept as "Success Probability". so plot_noise.py -- which reads that 
+# exact column name -- keeps working unmodified. It's still a 0-1 "higher is 
+# better" score, grounded in a real noisy-circuit simulation instead
+# of assumed probability.
 df = pd.DataFrame(
     all_rows,
     columns=[

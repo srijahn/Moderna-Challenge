@@ -5,10 +5,7 @@ df = pd.read_csv("results/noise_analysis.csv")
 
 plt.figure(figsize=(9, 6))
 
-# NOTE: results/noise_analysis.csv now has one block of noise levels per
-# benchmark sequence (see noise_simulation.py -- switched from a single
-# fixed 10 nt sequence to looping over all 8 curated benchmark sequences).
-# Plot one line per sequence instead of assuming a single global series.
+
 if "Label" in df.columns:
     for label, group in df.groupby("Label", sort=False):
         plt.plot(group["Noise Level"], group["Success Probability"], marker="o", label=label)

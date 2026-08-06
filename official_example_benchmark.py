@@ -1,25 +1,15 @@
 """
 Classical-only benchmark on the official example sequence given in the
 challenge brief itself (Moderna - WISER Quantum Challenge [SHARED].pdf,
-Task 2: "Classical benchmark generation"):
 
     GGAGCAAAACUUGUCGAUUGAGAACAAAAUACAGAAUUUGCUUG  (44 nt)
 
 This is NOT run through QAOA or CVaR-VQE. get_candidate_pairs() on this
-sequence returns far more candidate pairs than this project's measured
-QAOA feasibility ceiling (the README's runtime finding: ~17 min at 17
-qubits on local statevector simulation, and that's before CVaR-VQE's
-extra circuit-depth cost). Truncating the sequence to fit would mean this
+sequence returns far more candidate pairs than the project's measured
+QAOA feasibility ceiling. Truncating the sequence to fit would mean this
 is no longer actually "the official example," so instead this script only
-does the classical half explicitly asked for in Task 2/3: ViennaRNA MFE
-structure + energy, reported honestly as classical-only.
+does the classical half: ViennaRNA MFE structure + energy.
 
-If you want a quantum-comparable run on real, official-example-scale RNA,
-that requires either (a) a smaller/truncated fragment (explicitly labeled
-as a fragment, not the full example) or (b) a QUBO decomposition /
-window-based approach beyond this project's current scope -- see
-findings_week1.md for the same tradeoff already hit with the original 20
-nt placeholder sequence.
 """
 
 import RNA

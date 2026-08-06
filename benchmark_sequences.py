@@ -1,32 +1,3 @@
-"""
-8-sequence curated benchmark set for the statistical sweep
-(statistical_benchmark.py).
-
-This is the broader companion to test_sequences.py's 2-sequence validation
-pair: same idea (short sequences, confirmed by ViennaRNA to fold into a
-real, non-trivial structure, sized to stay brute-force-verifiable), but
-spanning a range of lengths (8-14 nt) and GC content (35.7%-100%) so the
-statistical benchmark isn't reporting mean +/- std over a single sequence
-length/composition.
-
-Regenerated 2026-07-26 (was referenced in the README/project status but
-missing from the repo -- rebuilt using the exact same search procedure as
-select_test_sequences.py so the numbers below are reproducible):
-
-    from select_test_sequences import search
-    search(length, n_tries=8000, max_qubits=13)
-
-then hand-picked one sequence per length (two at 10 nt, to keep continuity
-with test_sequences.py's existing TEST_SEQUENCE_10NT) trading off qubit
-budget (kept under 13, since statistical_benchmark.py runs QAOA/CVaR-VQE
-many times per sequence -- see runtime note in Project status) against GC
-diversity.
-
-Every entry below is independently confirmed (see __main__) against
-RNA.fold() -- sequence, dot-bracket structure, MFE (kcal/mol), qubit count
-(len(get_candidate_pairs(seq))), and GC% are all real measured values, not
-estimates.
-"""
 
 from rna_to_qubo_full import get_candidate_pairs
 

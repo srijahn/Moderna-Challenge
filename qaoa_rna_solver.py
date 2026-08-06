@@ -1,10 +1,6 @@
 """
 QAOA solver for the RNA folding QUBO (rna_to_qubo_full.py).
 
-Replaces the toy 2-qubit circuit in qaoa_optimizer.py with a real QAOA run
-over however many qubits the candidate-pair QUBO needs (one qubit per
-candidate base pair).
-
 Optimizer: derivative-free COBYLA (scipy.optimize.minimize), same choice
 already used successfully by cvar_vqe_rna_solver.py. Previously used
 PennyLane's diff_method="backprop" + gradient descent (Adam) -- measured
@@ -12,7 +8,7 @@ PennyLane's diff_method="backprop" + gradient descent (Adam) -- measured
 differentiate through the full 2^n-dim statevector simulation at every
 optimizer step, not just simulate it once. COBYLA only needs forward
 expectation-value evaluations (no autodiff machinery at all), which is why
-CVaR-VQE doesn't show the same blowup -- see README's scaling discussion.
+CVaR-VQE doesn't show the same blowup.
 
 Pipeline:
     sequence -> candidate pairs -> QUBO (Q matrix) -> Ising (h, J, offset)
@@ -92,21 +88,20 @@ def int_to_bits(idx, n_qubits):
 # 3. QAOA circuit, with multi-restart + top-K classical post-selection
 #
 # Shallow QAOA (small n_layers) doesn't always peak sharply on the exact
-# ground state -- that's expected/realistic NISQ-era behavior, not a bug.
-# Standard practice is to (a) restart the optimizer from a few random seeds
-# and keep the best, then (b) take the top-K most probable bitstrings from
+# ground state.
+# So restart the optimizer from a few random seeds
+# and keep the best, then take the top-K most probable bitstrings from
 # the final distribution and evaluate their *true* QUBO energy classically
 # (cheap, since evaluating a candidate is trivial), returning the best one.
 # ---------------------------------------------------------------------------
+
 def run_qaoa(Q, n_layers=3, steps=150, step_size=0.03, n_restarts=2, top_k=15, seed_offset=0):
+    
     # seed_offset lets callers run independent trials (e.g. for a statistical
     # benchmark across multiple runs): without it, every call restarts from
     # the exact same internal seeds and would silently return identical
     # results every time it's called.
-    #
-    # step_size is unused now (kept in the signature for backward
-    # compatibility with existing callers) -- COBYLA doesn't take a learning
-    # rate. `steps` is passed through as COBYLA's maxiter.
+    
     n_qubits = Q.shape[0]
     h, J, offset = qubo_to_ising(Q)
     cost_h, mixer_h = build_hamiltonians(h, J, n_qubits)

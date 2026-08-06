@@ -2,13 +2,11 @@
 Scaling analysis for the CVaR-VQE pipeline (cvar_vqe_rna_solver.py) --
 the CVaR-VQE counterpart to scaling_analysis_real.py (which covers QAOA).
 
-Together these two scripts give the Week 3 deliverable: run both quantum
-methods across the sequence-length ladder and record, for each: qubit count,
-circuit depth, number of QUBO variables, runtime, energy gap from the QUBO
-optimum, and success rate.
+Together they run both quantum methods across the sequence-length ladder and 
+record, for each: qubit count, circuit depth, number of QUBO variables, 
+runtime, energy gap from the QUBO optimum, and success rate.
 
-Two tiers of measurement, same honesty principle as scaling_analysis_real.py
--- report the simulator limit rather than extrapolating past it:
+Two tiers of measurement, same honesty principle as scaling_analysis_real.py:
 
   1. Resource counts (qubits, gate count, circuit depth) via qml.specs
      static analysis. Cheap, so measured across the FULL length ladder
@@ -20,12 +18,11 @@ Two tiers of measurement, same honesty principle as scaling_analysis_real.py
      MAX_OPT_QUBITS, and run several independent trials per length to get
      a success rate rather than a single anecdote.
 
-Note on "energy gap from MFE" (per the Week 3 plan wording): the ground
-truth used here is the exact optimum of our own QUBO (via brute force),
-not ViennaRNA's thermodynamic MFE directly -- those two only coincide if
-the QUBO's pairing rules + weights are a faithful proxy for real folding
-energetics, which is a modeling assumption, not a guarantee. We also print
-ViennaRNA's MFE energy alongside for context, but for pseudo-random test
+Note on "energy gap from MFE": the ground truth used here is the exact optimum 
+of our own QUBO (via brute force), not ViennaRNA's thermodynamic MFE directly 
+-- those two only coincide if the QUBO's pairing rules + weights are a faithful
+proxy for real folding energetics, which is a modeling assumption, not a guarantee. 
+We also print ViennaRNA's MFE energy alongside for context, but for pseudo-random test
 sequences at these lengths it is frequently 0.0 (no stable fold), which
 would make a literal MFE energy gap meaningless as a quality signal.
 """
@@ -57,11 +54,11 @@ LENGTHS = [8, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40, 45, 50]  # same ladder as 
 N_LAYERS = 3                # matches cvar_vqe_rna_solver.py default
 MAX_SIM_QUBITS = 16         # forward-pass timing cutoff (statevector is 2^n)
 MAX_OPT_QUBITS = 14         # full CVaR-VQE optimization + brute-force ground truth cutoff
-                             # (kept below MAX_SIM_QUBITS since optimization runs hundreds
-                             # of forward passes per trial, not just one)
-N_TRIALS = 3                 # independent optimization runs per length, for success rate
-TRIAL_MAXITER = 150          # COBYLA budget per trial (kept modest to cover the whole ladder)
-ALPHA = 0.15                 # CVaR tail fraction, matches cvar_vqe_rna_solver.py default
+                            # (kept below MAX_SIM_QUBITS since optimization runs hundreds
+                            # of forward passes per trial, not just one)
+N_TRIALS = 3                # independent optimization runs per length, for success rate
+TRIAL_MAXITER = 150         # COBYLA budget per trial (kept modest to cover the whole ladder)
+ALPHA = 0.15                # CVaR tail fraction, matches cvar_vqe_rna_solver.py default
 
 
 def generate_test_sequence(length, seed):

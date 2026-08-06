@@ -3,12 +3,6 @@ Second RNA secondary structure -> QUBO encoding: one-hot per-position
 pairing variables, instead of the one-variable-per-candidate-pair
 ("pair-indicator") encoding used by rna_to_qubo_full.py.
 
-Optional advanced TODO item from the README:
-    "Try a second QUBO encoding (e.g. one-hot per-position pairing
-    variables instead of pair-indicator variables) and compare qubit
-    count / constraint-enforcement tradeoffs against the current
-    encoding."
-
 -------------------------------------------------------------------------
 Encoding comparison
 -------------------------------------------------------------------------
@@ -41,9 +35,7 @@ sequence, in exchange for expressing "each position pairs with at most
 one partner" as an explicit, local one-hot constraint per position
 (closer to how one-hot encodings are usually written for combinatorial
 problems) rather than as pairwise penalties scattered across the whole
-candidate-pair conflict graph. The trade only makes sense if that
-locality is worth the extra qubits -- see compare_qubo_encodings.py for
-measured numbers.
+candidate-pair conflict graph.
 -------------------------------------------------------------------------
 """
 

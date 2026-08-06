@@ -1,28 +1,6 @@
-# NOTE: this script does not import benchmark_sequences.py itself. It only
-# prints whatever sequence/metrics generate_final_results.py already wrote to
-# results/final_results.csv (now one row per benchmark sequence) -- so its
-# output changes automatically whenever the upstream benchmark set changes,
-# with no edits needed here.
 
 import pandas as pd
 
-# --- Original approach ------------------------------------------------------
-# Everything below was hardcoded print statements, not computed from any
-# actual run (e.g. "Best Energy Found: -3.0", "RNA Length 20 -> 50
-# Variables" from formula-based guesses). Left here for reference only:
-#
-# print("ViennaRNA Reference Energy:") ; print("-4.0")
-# print("Best Energy Found:") ; print("-3.0")
-# print("Gamma = 0.7") ; print("Beta  = 0.3")
-# print("Success Probability") ; print("0.4796")
-# print("Energy Gap = 1.0") ; print("Approx Accuracy = 75%")
-# print("RNA Length 20 -> 50 Variables")
-# print("RNA Length 30 -> 112 Variables")
-# print("RNA Length 40 -> 200 Variables")
-# print("RNA Length 50 -> 312 Variables")
-
-# --- Superseded: single Metric/Value row for one fixed sequence ------------
-# Was results.set_index("Metric")["Value"] for a single 10 nt sequence. Now
 # reads one row per benchmark sequence written by generate_final_results.py
 # and prints a per-sequence section plus an aggregate summary.
 

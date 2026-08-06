@@ -1,13 +1,8 @@
 """
 Statistical benchmark: run both quantum methods (QAOA, CVaR-VQE) across all
-8 curated sequences in benchmark_sequences.py, with multiple independent
+12 curated sequences in benchmark_sequences.py, with multiple independent
 trials per sequence, and report mean +/- std instead of a single-run
 anecdote.
-
-Regenerated 2026-07-26 (was referenced in the README/project status but
-missing from the repo -- this is a from-scratch rewrite, not a recovered
-original, so re-verify any numbers already cited in a report draft against
-a fresh run of this script).
 
 For each (sequence, method) pair, a trial:
   1. Runs the solver (run_cvar_vqe / run_qaoa) with a different seed.
@@ -15,21 +10,10 @@ For each (sequence, method) pair, a trial:
      (via rna_to_qubo_full.brute_force_solve -- exact, since every sequence
      here was chosen to stay within brute-force range, <=20 qubits).
   3. Also decodes to dot-bracket and computes base-pair F1 against the real
-     ViennaRNA MFE structure (structure_metrics.py), for context -- note
-     this is a *harder*, different bar than "found the QUBO optimum": see
-     test_sequences.py / README for why QUBO-optimal and ViennaRNA-optimal
-     aren't always the same structure.
+     ViennaRNA MFE structure (structure_metrics.py), for context.
   "Success" = found the exact QUBO optimum (gap < 1e-6), same success
   criterion as cvar_vqe_scaling_analysis.py / scaling_analysis_real.py.
 
-QAOA note: per the Project status runtime finding (full 150-step x 2-restart
-QAOA takes ~17 min at 17 qubits), this batch sweep uses a REDUCED step
-budget (QAOA_STEPS / QAOA_RESTARTS below) so all 8 sequences x N_TRIALS_QAOA
-trials finish in a reasonable time locally. This is why QAOA's success rate
-here is expected to be markedly lower/noisier than a single full-budget run
-like qaoa_rna_solver.py's -- it's a batch-sweep tradeoff, not evidence QAOA
-is fundamentally worse than CVaR-VQE. Also, per QAOA_MAX_QUBITS below, the
-13 nt sequence (13 qubits) is skipped for QAOA in this sweep.
 
 Usage:
     python statistical_benchmark.py                    # both methods, overwrite CSVs
@@ -70,7 +54,7 @@ N_TRIALS_VQE = 5     # independent CVaR-VQE trials per sequence
 N_TRIALS_QAOA = 3    # independent QAOA trials per sequence (slower -- fewer trials)
 
 QAOA_MAX_QUBITS = 11        # sequences above this qubit count are skipped for QAOA
-                             # in this sweep (13 nt / 13-qubit entry) -- see docstring
+                             # in this sweep (13 nt / 13-qubit entry) 
 QAOA_STEPS = 100              # reduced from qaoa_rna_solver.py's default of 150,
 QAOA_RESTARTS = 2           # and 1 restart instead of 2 -- batch-sweep runtime tradeoff
 

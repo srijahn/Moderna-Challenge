@@ -1,19 +1,6 @@
 """
-Search for short RNA test sequences that are actually usable as validation
-cases for the quantum solvers.
 
-Why this exists: the project's original hardcoded 10 nt and 15 nt test
-sequences ("GGUGCCGAAC" and a seed=15 random 15-mer) turned out to have a
-fully-unpaired ViennaRNA MFE structure (0.00 kcal/mol) -- i.e. ViennaRNA's
-own thermodynamic model says these sequences don't fold at all. Every
-"validated against ViennaRNA" claim built on those two sequences was
-therefore only validating the quantum solver against its own QUBO's
-brute-force optimum (which always reports *some* pairing, since the QUBO
-objective rewards pairs), never against a real, non-trivial MFE structure.
-See structure_metrics.py / compare_to_vienna.py for the base-pair-level
-metrics that exposed this.
-
-This script fixes that by searching random short sequences (deterministic,
+Need short sequences (deterministic,
 seeded) for ones that:
   1. Have a non-trivial ViennaRNA MFE structure (at least one base pair).
   2. Stay within a qubit budget that brute_force_solve() can still validate
@@ -26,8 +13,7 @@ compare_to_vienna.py, batch_accuracy.py, generate_final_results.py,
 noise_simulation.py) references the same, verified-folding validation set
 instead of each picking its own arbitrary example.
 
-Re-run this script any time you want to search for additional/different
-validation sequences (e.g. a different length or qubit budget).
+
 """
 
 import random

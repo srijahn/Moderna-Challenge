@@ -21,11 +21,11 @@ import numpy as np
 # ---------------------------------------------------------------------------
 SEQUENCE = "GGUGCCGAACAGUAGCACUC"
 
-MIN_LOOP_SIZE = 3      # minimum unpaired nt strictly between i and j
+MIN_LOOP_SIZE = 3       # minimum unpaired nt strictly between i and j
 WC_WEIGHT = 2.0         # reward for a Watson-Crick pair (A-U, G-C)
 WOBBLE_WEIGHT = 1.0     # reward for a wobble pair (G-U) -- weaker, so lower weight
 PENALTY = 10.0          # conflict penalty; should be >> max possible reward
-                         # so the optimizer never "profits" from breaking a constraint
+                        # so the optimizer never "profits" from breaking a constraint
 
 
 # ---------------------------------------------------------------------------
@@ -109,7 +109,7 @@ def energy(x, Q):
 
 # ---------------------------------------------------------------------------
 # 5. Brute-force solver (only feasible for small n_vars, e.g. the 10 nt test
-#    sequence from the plan -- use this to validate against ViennaRNA MFE)
+#    sequence from the plan -- to validate against ViennaRNA MFE)
 # ---------------------------------------------------------------------------
 def brute_force_solve(Q, max_vars_for_bruteforce=20):
     n_vars = Q.shape[0]

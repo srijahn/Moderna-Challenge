@@ -7,20 +7,7 @@ from cvar_vqe_rna_solver import run_cvar_vqe, pairs_to_dot_bracket
 from structure_metrics import real_energy, base_pair_metrics
 from benchmark_sequences import BENCHMARK_SEQUENCES
 
-# --- Original approach ------------------------------------------------------
-# Hand-written example values, not computed from any actual run:
-# data = {
-#     "Metric": [
-#         "ViennaRNA MFE", "Quantum Candidate Energy", "Energy Gap",
-#         "Approx Accuracy (%)", "QAOA Success Probability",
-#         "Best Gamma", "Best Beta",
-#     ],
-#     "Value": [-4.0, -3.0, 1.0, 75.0, 0.4796, 0.7, 0.3],
-# }
-
-# --- Superseded: single fixed 10 nt sequence, one Metric/Value column pair -
-# Was TEST_SEQUENCE_10NT only, written as a single Metric/Value table. Now
-# loops over the full 8-sequence curated benchmark set (benchmark_sequences.py,
+# loops over the full curated benchmark set (benchmark_sequences.py,
 # 8-14 nt, 35.7%-100% GC content, all confirmed by ViennaRNA to fold) and
 # writes one row per sequence instead, so results/final_results.csv covers
 # the whole benchmark, not one anecdote. final_summary.py reads this same
@@ -58,7 +45,7 @@ for label, sequence, _, _, _ in BENCHMARK_SEQUENCES:
     else:
         quantum_energy, quantum_structure, quantum_method = vqe_energy, vqe_structure, "CVaR-VQE"
 
-    # Real ViennaRNA-based comparison (Task 3): same units, same
+    # Real ViennaRNA-based comparison: same units, same
     # thermodynamic model as the MFE, unlike the QUBO energy above which is
     # an arbitrary reward/penalty scheme used only to steer the quantum
     # optimizers.
