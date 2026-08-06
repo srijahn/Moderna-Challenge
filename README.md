@@ -4,6 +4,57 @@ Exploring RNA secondary structure prediction (minimum free energy folding) using
 classical benchmarking (ViennaRNA) and quantum/quantum-inspired methods
 (QUBO formulation + QAOA/CVaR-VQE in PennyLane).
 
+Full write-up: [`Moderna_RNA_Folding_Quantum_Report.docx`](./Moderna_RNA_Folding_Quantum_Report.docx). This README summarizes the same project for anyone browsing the repository directly.
+
+---
+
+## The Challenge
+
+Moderna's mRNA medicines depend on predictable secondary structure — it affects molecular stability, translation efficiency, and manufacturability. Classical tools like ViennaRNA find the exact Minimum Free Energy (MFE) structure via dynamic programming, but that approach only works for the pseudoknot-free case; richer structural constraints break the recursion and make exact folding NP-hard in general. The WISER × Moderna brief asks participants to formulate RNA folding as a quantum or quantum-inspired optimization problem, reproduce known MFE benchmark structures for small sequences, and analyze how quantum resource requirements scale with sequence length.
+
+## Our Approach
+
+Each candidate base pair becomes a binary decision variable in a QUBO (Quadratic Unconstrained Binary Optimization) objective: valid Watson-Crick and wobble (G-U) pairs are rewarded, a minimum hairpin-loop constraint is enforced at candidate-generation time, and overlapping or crossing (pseudoknotted) pairs are penalized so the optimizer never selects them. Two independent quantum methods — QAOA and CVaR-VQE, both implemented in PennyLane — solve this QUBO and are checked against a classical ViennaRNA ground truth, not just against each other. Running two methods with different objectives (plain expectation value vs. CVaR) against the same QUBO gives a built-in cross-check: agreement is evidence a solution reflects the underlying problem rather than one circuit's quirk.
+
+**Alternatives considered:** the brief also lists quantum annealing, Grover-style search, and tensor-network-inspired methods as options. Annealing was set aside because the project's toolchain and available hardware access centered on gate-model simulators (the QUBO itself is annealer-agnostic, so it would carry over if hardware access becomes available). Grover-style search doesn't naturally fit a weighted quadratic cost landscape — it's built for locating a single marked item via a known oracle, not minimizing among many low-lying near-optimal states. Tensor-network methods are suited to compactly representing highly entangled states, but this problem's core difficulty is combinatorial (which base pairs to select), not a state-representation problem — adapting a tensor-network optimizer to this QUBO was judged out of scope for the timeline.
+
+## Methods & Tools
+
+- **Classical baseline:** ViennaRNA (`RNA.fold`, `RNA.fold_compound().eval_structure()`) for MFE structures and real thermodynamic energy evaluation
+- **QUBO formulation:** pair-indicator encoding (one qubit per candidate base pair), brute-force validated against ViennaRNA; a second one-hot encoding was also implemented and cross-validated as an optional advanced task
+- **Quantum solvers:** QAOA and CVaR-VQE (two-local ansatz), both in PennyLane, both optimized with derivative-free COBYLA
+- **Evaluation:** base-pair precision/recall/F1 and real thermodynamic energy gap against ViennaRNA (not just internal QUBO score)
+- **Robustness testing:** multi-trial statistical benchmarking (mean ± std), a real PennyLane depolarizing-noise model, and measured (not estimated) qubit/circuit-depth/runtime scaling up to 50 nt
+
+## Results
+
+Across a curated 12-sequence benchmark (8–14 nt, 33%–100% GC content):
+
+| Metric | QAOA | CVaR-VQE |
+|---|---|---|
+| Mean success rate (multi-trial) | ≈48% | 100% |
+| Exact ViennaRNA MFE match | 4 of 12 best-method wins | 8 of 12 best-method wins |
+| Practical qubit ceiling | ~11–13 qubits | ~13–14 qubits |
+| Mean optimization runtime | ~9.8 s | ~2.9 s |
+
+CVaR-VQE reproduces its own QUBO's exact optimum on every sequence and trial tested, and that optimum matches ViennaRNA's real MFE structure exactly (F1 = 1.0, energy gap = 0.0 kcal/mol) on 11 of 12 sequences. Under depolarizing noise, QAOA's mean success probability falls from 100% (ideal) to 74% at moderate noise (p = 0.05) and 55% at high noise (p = 0.10). Resource scaling was measured (not formula-estimated) up to 50 nt (378 qubits); full quality-checked optimization is only run up to ~13–14 qubits, where statevector simulation is still tractable.
+
+## Limitations & Next Steps
+
+- **QUBO objective is imperfect:** a simple pair-count reward diverges from real ViennaRNA thermodynamics on a minority of sequences (2 of 12) — a limitation of the objective, not the optimizers. *Next step: a length- and stack-dependent reward closer to real nearest-neighbor thermodynamics.*
+- **QAOA reliability gap:** ≈48% vs. 100% success rate under this project's optimizer/step budget. *Next step: sweep circuit depth (p), step budget, and restart count to see if the gap closes.*
+- **Pseudoknots excluded by design**, matching ViennaRNA's own DP assumption but limiting applicability to the pseudoknot-free subset of real structures. *Next step: relax or reweight the crossing-pair penalty to allow scoring pseudoknotted structures.*
+- **Simulator-only:** no results here speak to physical NISQ hardware behavior. *Next step: run the smallest validated cases (8–11 qubits) on real hardware.*
+- **Qubit ceiling:** full optimization tops out around 13–14 qubits. *Next step: windowed/hierarchical QUBO decomposition to push past this without waiting on hardware qubit counts.*
+
+## Team Contributions
+
+- **Sri Jahnavi Chinthalapudi** — QUBO formulation and both encodings (pair-indicator and one-hot), both quantum solvers (QAOA and CVaR-VQE), the statistical, scaling, and noise-robustness analyses, structural/energy evaluation metrics, and final code clean-up across the repository.
+- **Yagna Priya Gummadi** — Classical ViennaRNA benchmark implementation, and the final report and accompanying presentation.
+- **Sree Neha** — Curated benchmark sequence selection and the background review (`Rna_basics.docx`).
+
+---
+
 ## Requirements
 
 ### Software
@@ -168,4 +219,3 @@ Then:
 | `rna_to_qubo_onehot.py` | Second QUBO encoding (optional advanced task): one-hot-per-position pairing variables (2 directed qubits per candidate pair + one-hot/consistency penalties) instead of `rna_to_qubo_full.py`'s pair-indicator variables |
 | `compare_qubo_encodings.py` | Measures qubit count and penalty-term count for both encodings across all 14 curated test/benchmark sequences, and brute-force-validates that both encodings agree with each other and with ViennaRNA MFE wherever feasible → `results/qubo_encoding_comparison.csv` |
 | `plot_qubo_encoding_comparison.py` | Plots `results/qubo_encoding_comparison.csv` (grouped bar chart, qubits per sequence per encoding) → `results/qubo_encoding_comparison_plot.png` |
-
