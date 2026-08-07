@@ -6,6 +6,8 @@ classical benchmarking (ViennaRNA) and quantum/quantum-inspired methods
 
 Full write-up: [`Moderna_RNA_Folding_Quantum_Report.pdf`](./Moderna_RNA_Folding_Quantum_Report.pdf). This README summarizes the same project for anyone browsing the repository directly.
 
+video Presentation: https://drive.google.com/drive/u/0/folders/138-EXMUcUvpzcnCbqUSMeU5ZktcSiF1C
+
 ---
 
 ## The Challenge
